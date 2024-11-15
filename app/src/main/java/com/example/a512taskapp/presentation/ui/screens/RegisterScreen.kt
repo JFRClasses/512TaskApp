@@ -1,8 +1,8 @@
 package com.example.a512taskapp.presentation.ui.screens
 
 import android.util.Log
+import android.widget.Space
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,10 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +35,6 @@ import com.example.a512taskapp.R
 import com.example.a512taskapp.datasources.services.AuthService
 import com.example.a512taskapp.domain.dtos.AuthDto
 import com.example.a512taskapp.presentation.ui.theme._512TaskAppTheme
-import com.example.a512taskapp.presentation.ui.utils.Lock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -46,7 +42,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
     navController: NavController = rememberNavController()
 ) {
@@ -56,59 +52,71 @@ fun LoginScreen(
     var password by remember {
         mutableStateOf("")
     }
+    var confirmPassword by remember {
+        mutableStateOf("")
+    }
+    val isButtonEnabled = email.isNotEmpty()
+            && password.isNotEmpty()
+            && confirmPassword.isNotEmpty()
+            && password == confirmPassword
     val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .padding(16.dp),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Taskly")
         Image(
             painter = painterResource(id = R.drawable.login),
-            contentDescription = "login",
+            contentDescription = "register",
             modifier = Modifier.size(250.dp)
         )
+        Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
             placeholder = { Text(text = "Correo Electronico") },
-            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "email") }
+            shape = RoundedCornerShape(24.dp)
         )
         Spacer(modifier = Modifier.height(10.dp))
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
             placeholder = { Text(text = "Contraseña") },
-            leadingIcon = { Icon(imageVector = Lock, contentDescription = "email") },
+            shape = RoundedCornerShape(24.dp),
             visualTransformation = PasswordVisualTransformation()
-
         )
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+        OutlinedTextField(
+            value = confirmPassword,
+            onValueChange = { confirmPassword = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(text = "Confirmar contraseña") },
+            shape = RoundedCornerShape(24.dp),
+            visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(10.dp))
         Button(
+            enabled = isButtonEnabled,
             onClick = {
                 scope.launch(Dispatchers.IO) {
-                    if(email.isNotEmpty() && password.isNotEmpty()){
-                        val authService = Retrofit.Builder()
-                            .baseUrl("https://taskapi.juanfrausto.com/api/")
-                            .addConverterFactory(GsonConverterFactory.create())
-                            .build()
-                            .create(AuthService::class.java)
-                        val loginDto = AuthDto(email = email, password = password)
-                        val response = authService.login(loginDto)
-                        Log.i("LoginScreenAPI",response.toString())
-                        if(response.code() == 200){
-                            if(response.body()?.isLogged == true){
-                                //El usuario se logueeo correctamente
-                                withContext(Dispatchers.Main){
-                                    navController.navigate("home")
-                                }
+                    val authService = Retrofit.Builder()
+                        .baseUrl("https://taskapi.juanfrausto.com/api/")
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build()
+                        .create(AuthService::class.java)
+                    val authDto = AuthDto(email = email, password = password)
+                    val response = authService.registerUser(authDto)
+                    Log.i("RegisterScreenAPI",response.toString())
+                    if(response.code() == 200){
+                        if(response.body()?.isLogged == true){
+                            //El usuario se logueeo correctamente
+                            withContext(Dispatchers.Main){
+                                navController.navigate("home")
                             }
                         }
                     }
@@ -117,15 +125,16 @@ fun LoginScreen(
                 .fillMaxWidth()
                 .height(48.dp)
         ) {
-            Text(text = "Iniciar Sesion")
+            Text(text = "Registrarse")
         }
-        Spacer(modifier = Modifier.height(15.dp))
-        Text(
-            text = "¿No tienes una cuenta? Crea una",
-            color = Color.Gray,
-            modifier = Modifier.clickable {
-                navController.navigate("register")
-            })
+        if(password != confirmPassword){
+            Text(
+                text = "Las constraseñas no coinciden",
+                color = Color.Red,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+
     }
 }
 
@@ -134,8 +143,8 @@ fun LoginScreen(
     showSystemUi = true
 )
 @Composable
-fun LoginScreenPreview() {
+fun RegisterScreenPreview() {
     _512TaskAppTheme {
-        LoginScreen()
+        RegisterScreen()
     }
 }
