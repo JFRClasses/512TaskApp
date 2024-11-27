@@ -81,9 +81,9 @@ val poppinsTypo = Typography(
         lineHeight = 32.sp
     ),
     titleLarge = TextStyle(
-        fontWeight = FontWeight.W700,
+        fontWeight = FontWeight.W900,
         fontFamily = poppinsFontFamily,
-        fontSize = 22.sp,
+        fontSize = 36.sp,
         lineHeight = 28.sp
     ),
     titleMedium = TextStyle(

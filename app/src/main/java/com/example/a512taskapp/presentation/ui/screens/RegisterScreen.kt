@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.a512taskapp.R
 import com.example.a512taskapp.datasources.services.AuthService
 import com.example.a512taskapp.domain.dtos.AuthDto
+import com.example.a512taskapp.domain.use_cases.SharedPref
 import com.example.a512taskapp.presentation.ui.theme._512TaskAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,7 +46,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 @Composable
 fun RegisterScreen(
     innerPadding: PaddingValues = PaddingValues(0.dp),
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    sharedPref: SharedPref
 ) {
     var email by remember {
         mutableStateOf("")
@@ -145,6 +148,10 @@ fun RegisterScreen(
 @Composable
 fun RegisterScreenPreview() {
     _512TaskAppTheme {
-        RegisterScreen()
+        RegisterScreen(
+            innerPadding = PaddingValues(0.dp),
+            navController = rememberNavController(),
+            sharedPref = SharedPref(LocalContext.current)
+        )
     }
 }
